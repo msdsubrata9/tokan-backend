@@ -14,6 +14,7 @@ client.connect((err) => {
 });
 
 const logintype = 0; // 0 for signup, 1 for signin
+const lastLoginTime = new Date();
 
 const connection = mysql2.createPool({
   host: "localhost",
@@ -35,7 +36,7 @@ const signupController = async (req, res) => {
 
   connection.query(sql, values, (error, results) => {
     if (error) {
-      res.status(500).send({ success: false, message: error });
+      res.send({ success: false, message: "Duplicate Email Id" });
     } else {
       // get the next auto-incremented userid value
       client
@@ -57,10 +58,11 @@ const signupController = async (req, res) => {
             .insertOne(
               {
                 userid: userid,
-                timestamp: new Date(),
+                timestamp: lastLoginTime,
                 email: femail,
                 ip: req.ip,
                 logintype: logintype,
+                lastLoginTime: lastLoginTime,
               },
               function (err, res) {
                 if (err) {
@@ -80,15 +82,14 @@ const loginController = (req, res, next) => {
   const selectQuery = `SELECT password FROM users WHERE email = ?`;
   connection.query(selectQuery, [req.body.femail], async (error, results) => {
     if (error) {
-      return res.status(500).json({ error });
+      res.send({ success: false, message: "Invalid email or password" });
     }
 
     if (results.length === 0) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      res.send({ message: "Invalid email or password" });
     }
 
     // Compare the provided plain text password with the hashed password
-
     const match = await bcrypt.compare(req.body.fpassword, results[0].password);
 
     if (match) {
@@ -112,9 +113,9 @@ const loginController = (req, res, next) => {
           }
         );
       next();
-      return res.json({ message: "Successful login" });
+      res.send({ message: "Successful login" });
     } else {
-      return res.status(401).json({ message: "Invalid email or password" });
+      res.json({ message: "Invalid email or password" });
     }
   });
 };
