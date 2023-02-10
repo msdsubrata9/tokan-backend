@@ -33,19 +33,17 @@ app.use(cors(corsOpts));
 
 app.post("/Signup", signupValidator, signupController);
 
-app.post(
-  "/login",
-  loginValidator,
-  loginController,
-  function logincount(req, res) {
-    client
-      .db(databaseName)
-      .collection("users")
-      .countDocuments({ email: req.body.femail }, function (err, count) {
-        console.log("Login Count is: ", count);
-      });
-  }
-);
+app.post("/logincount", async (req, res) => {
+  let femail = await req.body.femail;
+  client
+    .db(databaseName)
+    .collection("users")
+    .countDocuments({ email: femail, logintype: 1 }, function (err, count) {
+      res.json({ message: `Login count of "${femail} is: "`, count: count });
+    });
+});
+
+app.post("/login", loginValidator, loginController);
 
 app.listen(8000, () => {
   console.log("Server started on port 8000");

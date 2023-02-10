@@ -41,7 +41,7 @@ const loginValidator = (req, res, next) => {
   if (!_.isEmpty(result) && !Object.keys(result).includes("error")) {
     next();
   } else {
-    return res.status(400).json({ error: result.error.details[0].message });
+    res.send({ message: "Invalid email" });
   }
 };
 
