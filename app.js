@@ -15,7 +15,7 @@ client.connect((err) => {
   if (err) {
     console.log("Error connecting to MongoDB");
   }
-  console.log("Connected to MongoDB");
+  console.log(">>>>>>>>>>>> MongoDB Connected >>>>>>>>");
 });
 
 app.use(bodyParser.json());
